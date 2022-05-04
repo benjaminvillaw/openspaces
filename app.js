@@ -35,14 +35,40 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     console.log('a user connected');
+
+    socket.on('getAllMessages', (msg) => {
+        messages.push(msg);
+        console.log('getAllMessages: ', messages);
+        socket.emit('gotAllMessages', messages)
+    });
+
     socket.on('messages', (msg) => {
         messages.push(msg);
         console.log('message: ', messages);
+        socket.emit('gotMessage', 'messages')
     });
 });
 
-server.listen("3001", () => {
+server.listen("3000", () => {
     console.log(`Example app listening on port`)
 })
 
 module.exports = app;
+
+
+
+
+
+// const messages = [
+//     {
+//       lat: 1.00,
+//       long: -2.0,
+//       messages: [{userId, timestamp, message}]
+//     } ,
+//     {
+//     lat: 2,long: 3, messages: [{userId, timestamp, message}]}
+//   ]
+
+//   messages.find(({lat, long}) => {
+//       return pinLat === lat && pinLong === long
+//   })
