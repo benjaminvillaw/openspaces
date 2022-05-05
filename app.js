@@ -1,63 +1,84 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors')
-const http = require('http');
-const { Server } = require("socket.io");
-const messages = []
+// Using Node.js `require()`
+require("dotenv").config({
+    path: "./.env.local",
+});
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// console.log(process.env) // remove this after you've confirmed it working
+
+const mongoose = require("mongoose");
+
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
+var cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
+
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var messageModel = require("./schema/messages");
 
 var app = express();
+mongoose
+    .connect(process.env.MONGODB_URL)
+    .then((response) => {
+        console.log("Connected to MongoDB");
+    })
+    .catch((err) => {
+        if (err) console.error(err);
+    });
 const server = http.createServer(app);
 
-app.use(cors())
-app.options('*', cors())
+app.use(cors());
+app.options("*", cors());
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
 const io = new Server(server, {
     cors: {
         origin: "*",
         allowedHeaders: ["my-custom-header"],
-        credentials: true
-    }
+        credentials: true,
+    },
 });
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
+async function getAllMessages() {
+    const messages = await messageModel.find({}).lean();
+    return messages;
+}
 
-    socket.on('getAllMessages', (msg) => {
-        messages.push(msg);
-        console.log('getAllMessages: ', messages);
-        socket.emit('gotAllMessages', messages)
+async function addNewMessage(message) {
+    const newMessage = await messageModel.create(message);
+    return newMessage;
+}
+
+// const messages = [];
+io.on("connection", async(socket) => {
+    console.log("a user connected");
+    socket.emit("initMessages", {
+        messages: await getAllMessages(),
     });
-
-    socket.on('messages', (msg) => {
-        messages.push(msg);
-        console.log('message: ', messages);
-        socket.emit('gotMessage', 'messages')
+    socket.on("newMessage", async(payload) => {
+        const newMessage = await addNewMessage(payload.message);
+        socket.broadcast.emit("newMessage", {
+            message: newMessage,
+        });
     });
 });
 
-server.listen("3000", () => {
-    console.log(`Example app listening on port`)
-})
+server.listen(process.env.PORT || 3000, () => {
+    console.log(`Example app listening on port`);
+});
 
 module.exports = app;
-
-
-
-
 
 // const messages = [
 //     {
