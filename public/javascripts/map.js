@@ -105,7 +105,8 @@
         }
     }
     initMessages();
-    getLocation();
+    // getLocation();
+    window.getLocation = getLocation;
 })();
 
 // const webglOverlayView = new google.maps.WebGLOverlayView();
