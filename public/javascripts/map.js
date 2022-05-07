@@ -25,6 +25,18 @@
         });
     }
 
+    function addMessageToModal(message) {
+        const messageContainer = document.createElement("div");
+        messageContainer.classList.add("row");
+        const messageEl = document.createElement("div");
+        messageEl.textContent = message.message;
+        messageContainer.appendChild(messageEl);
+        const timeEl = document.createElement("div");
+        timeEl.textContent = new Date(message.time).toLocaleString();
+        messageContainer.appendChild(timeEl);
+        modalMessages.appendChild(messageContainer);
+    }
+
     function showModal(message, replies) {
         chatModal.classList.add("show");
 
@@ -35,9 +47,7 @@
         modalMessages.appendChild(messageEl);
 
         replies.forEach((reply) => {
-            const messageEl = document.createElement("div");
-            messageEl.textContent = reply.message;
-            modalMessages.appendChild(messageEl);
+            addMessageToModal(reply);
         });
     }
 
@@ -81,9 +91,7 @@
         message.replies.push(reply);
 
         if (activeMessageId === messageId) {
-            const messageEl = document.createElement("div");
-            messageEl.textContent = reply.message;
-            modalMessages.appendChild(messageEl);
+            addMessageToModal(reply);
         }
     }
 

@@ -12,6 +12,11 @@ a {
     color: #00B7FF;
 }
 
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
 
 /* Set the size of the div element that contains the map */
 
