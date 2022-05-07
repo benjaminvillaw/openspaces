@@ -2,28 +2,30 @@
 
 <head>
     <title>OpenSpaces.io</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
-
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="/stylesheets/modal.css" />
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
-
 </head>
 
 <body>
-    <h1> OpenSpaces.io </h1>
+    <h1>OpenSpaces.io</h1>
     <p></p>
 
     <div id="map"></div>
-
-    <div id="chatbox-container">
-
+    <div class="modal" id="chat-modal">
+        <div class="modal-inner">
+            <div class="modal-header" id="modal-close">x</div>
+            <div class="modal-body" id="modal-messages"></div>
+            <form class="modal-footer" id="modal-reply">
+                <input name="message" />
+                <button>Reply</button>
+            </form>
+        </div>
     </div>
 
-
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCYZG-gGS8hf18R4NvWY7cayiMYowjovAk&callback=getLocation"></script>
-    <script src='javascripts/map.js'></script>
-
-
+    <script src="javascripts/map.js"></script>
 </body>
 
 </html>

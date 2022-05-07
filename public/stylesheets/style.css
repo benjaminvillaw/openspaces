@@ -3,6 +3,11 @@ body {
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+form,
+div {
+    margin: 0;
+}
+
 a {
     color: #00B7FF;
 }

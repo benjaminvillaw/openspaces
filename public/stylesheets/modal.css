@@ -1,0 +1,47 @@
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.modal .modal-inner {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    height: 50%;
+    background-color: white;
+    border-radius: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+.modal .modal-inner .modal-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-grow: 0;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.modal .modal-inner .modal-body {
+    flex-grow: 1;
+}
+
+.modal .modal-inner .modal-footer {
+    flex-grow: 0;
+    display: flex;
+}
+
+.modal .modal-inner .modal-footer input {
+    flex-grow: 1;
+}
+
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

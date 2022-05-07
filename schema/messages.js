@@ -9,6 +9,13 @@ const messagesSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    replies: [{
+        message: String,
+        time: {
+            type: Date,
+            default: Date.now,
+        },
+    }, ],
 });
 
 module.exports = mongoose.model("messages", messagesSchema);

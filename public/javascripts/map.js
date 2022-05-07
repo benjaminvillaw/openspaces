@@ -1,6 +1,10 @@
 (function() {
-    let map, currentLocationMarker, currentLocationCircle, pos;
+    let map, currentLocationMarker, currentLocationCircle, pos, activeMessage;
     let messages = [];
+    const chatModal = document.getElementById("chat-modal");
+    const modalClose = document.getElementById("modal-close");
+    const modalMessages = document.getElementById("modal-messages");
+    const modalReply = document.getElementById("modal-reply");
 
     var socket = io();
 
@@ -10,13 +14,45 @@
             position: { lat: message.lat, lng: message.lng },
             map,
         });
-        infoWindow.setContent(message.message);
+        infoWindow.setContent(buildContent(message));
         infoWindow.setPosition({ lat: message.lat, lng: message.lng });
         infoWindow.open(map);
+        console.log(infoWindow);
+        // infoWindow.content.parentNode.classList.add("test");
 
         marker.addListener("click", () => {
             infoWindow.open(map);
         });
+    }
+
+    function showModal(message) {
+        chatModal.classList.add("show");
+
+        modalMessages.innerHTML = "";
+        const messageEl = document.createElement("div");
+        messageEl.textContent = message;
+        modalMessages.appendChild(messageEl);
+    }
+
+    function addReply(message) {
+        console.log(activeMessage, message);
+    }
+
+    function buildContent({ message, _id }) {
+        const container = document.createElement("div");
+        const messageEl = document.createElement("span");
+        messageEl.textContent = message.slice(0, 15);
+        container.appendChild(messageEl);
+        container.addEventListener("click", () => {
+            activeMessage = _id;
+            showModal(message);
+        });
+        if (message.length >= 15) {
+            const messageMoreEl = document.createElement("span");
+            messageMoreEl.textContent = "...";
+            container.appendChild(messageMoreEl);
+        }
+        return container;
     }
 
     function receivedMessage(message) {
@@ -107,6 +143,16 @@
     initMessages();
     // getLocation();
     window.getLocation = getLocation;
+
+    modalClose.addEventListener("click", () => {
+        chatModal.classList.remove("show");
+    });
+    modalReply.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const message = formData.get("message");
+        addReply(message);
+    });
 })();
 
 // const webglOverlayView = new google.maps.WebGLOverlayView();
