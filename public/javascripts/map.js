@@ -1,5 +1,5 @@
 (function() {
-    let map, currentLocationMarker, currentLocationCircle, pos, activeMessage;
+    let map, currentLocationMarker, currentLocationCircle, pos, activeMessageId;
     let messages = [];
     const chatModal = document.getElementById("chat-modal");
     const modalClose = document.getElementById("modal-close");
@@ -25,27 +25,35 @@
         });
     }
 
-    function showModal(message) {
+    function showModal(message, replies) {
         chatModal.classList.add("show");
 
         modalMessages.innerHTML = "";
+
         const messageEl = document.createElement("div");
         messageEl.textContent = message;
         modalMessages.appendChild(messageEl);
+
+        replies.forEach((reply) => {
+            const messageEl = document.createElement("div");
+            messageEl.textContent = reply.message;
+            modalMessages.appendChild(messageEl);
+        });
     }
 
     function addReply(message) {
-        console.log(activeMessage, message);
+        // console.log(activeMessage, message);
+        socket.emit("newReply", { activeMessageId, message });
     }
 
-    function buildContent({ message, _id }) {
+    function buildContent({ message, _id, replies }) {
         const container = document.createElement("div");
         const messageEl = document.createElement("span");
         messageEl.textContent = message.slice(0, 15);
         container.appendChild(messageEl);
         container.addEventListener("click", () => {
-            activeMessage = _id;
-            showModal(message);
+            activeMessageId = _id;
+            showModal(message, replies);
         });
         if (message.length >= 15) {
             const messageMoreEl = document.createElement("span");
@@ -56,11 +64,27 @@
     }
 
     function receivedMessage(message) {
+        if (!message.replies) {
+            message.replies = [];
+        }
         messages.push(message);
         if (!map) {
             return;
         }
         addMessageToMap(message);
+    }
+
+    function receivedReply(messageId, reply) {
+        const message = messages.find((message) => {
+            return message._id === messageId;
+        });
+        message.replies.push(reply);
+
+        if (activeMessageId === messageId) {
+            const messageEl = document.createElement("div");
+            messageEl.textContent = reply.message;
+            modalMessages.appendChild(messageEl);
+        }
     }
 
     function sendMessage(position) {
@@ -74,21 +98,22 @@
             lng: typeof position.lng === "function" ? position.lng() : position.lng,
         };
 
-        addMessageToMap(message);
         socket.emit("newMessage", {
             message,
         });
-        messages.push(message);
     }
 
     function initMessages() {
-        socket.on("initMessages", (msg) => {
-            msg.messages.forEach((message) => {
+        socket.on("initMessages", (payload) => {
+            payload.messages.forEach((message) => {
                 receivedMessage(message);
             });
         });
-        socket.on("newMessage", (msg) => {
-            receivedMessage(msg.message);
+        socket.on("newMessage", (payload) => {
+            receivedMessage(payload.message);
+        });
+        socket.on("newReply", (payload) => {
+            receivedReply(payload.messageId, payload.reply);
         });
     }
 
@@ -152,6 +177,7 @@
         const formData = new FormData(event.target);
         const message = formData.get("message");
         addReply(message);
+        event.target.reset();
     });
 })();
 

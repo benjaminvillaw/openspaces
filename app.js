@@ -60,6 +60,15 @@ async function addNewMessage(message) {
     return newMessage;
 }
 
+async function addNewReply(messageId, replyMessage) {
+    const message = await messageModel.findById(messageId);
+    message.replies.push({
+        message: replyMessage,
+    });
+    await message.save();
+    return message.replies[message.replies.length - 1];
+}
+
 // const messages = [];
 io.on("connection", async(socket) => {
     console.log("a user connected");
@@ -68,9 +77,23 @@ io.on("connection", async(socket) => {
     });
     socket.on("newMessage", async(payload) => {
         const newMessage = await addNewMessage(payload.message);
-        socket.broadcast.emit("newMessage", {
+        const outgoingPayload = {
             message: newMessage,
-        });
+        };
+        socket.broadcast.emit("newMessage", outgoingPayload);
+        socket.emit("newMessage", outgoingPayload);
+    });
+    socket.on("newReply", async(payload) => {
+        const newReply = await addNewReply(
+            payload.activeMessageId,
+            payload.message
+        );
+        const outgoingPayload = {
+            reply: newReply,
+            messageId: payload.activeMessageId,
+        };
+        socket.broadcast.emit("newReply", outgoingPayload);
+        socket.emit("newReply", outgoingPayload);
     });
 });
 
